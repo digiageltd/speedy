@@ -2,6 +2,8 @@
 
 namespace Digiageltd\Speedy;
 
+use Illuminate\Support\Facades\Log;
+
 class SpeedyController
 {
     public static $sender;
@@ -10,10 +12,12 @@ class SpeedyController
     public static $apiBaseURL = 'https://api.speedy.bg/v1/';
     public static $language = 'BG';
 
-    public static function writeCredentials($apiCredentials, $sender) {
+    public function writeCredentials($apiCredentials, $sender) {
         self::$sender = $sender;
         self::$apiUser = $apiCredentials['apiUser'];
         self::$apiPass = $apiCredentials['apiPass'];
+
+        return $apiCredentials['apiUser'];
     }
 
     public static function apiCredentials() {
@@ -62,6 +66,7 @@ class SpeedyController
         $sendRequest = $this->sendRequest('location/site/', $jsonData);
         $result = json_decode($sendRequest, true);
         $result = $result['sites'];
+        $data = [];
         for($i=0;$i<=count($result);$i++) {
             if (isset($result[$i])) {
                 $data[] = [
@@ -81,6 +86,7 @@ class SpeedyController
         $sendRequest = $this->sendRequest('location/street/', $jsonData);
         $result = json_decode($sendRequest, true);
         $result = $result["streets"];
+        $data = [];
         for($i=0;$i<=count($result);$i++) {
             if (isset($result[$i])) {
                 $data[] = [
@@ -100,6 +106,7 @@ class SpeedyController
         $sendRequest = $this->sendRequest('location/complex/', $jsonData);
         $result = json_decode($sendRequest, true);
         $result = $result['complexes'];
+        $data = [];
         for($i=0;$i<=count($result);$i++) {
             if (isset($result[$i])) {
                 $data[] = [
@@ -120,6 +127,7 @@ class SpeedyController
         $sendRequest = $this->sendRequest('location/office/', $jsonData);
         $result = json_decode($sendRequest, true);
         $result = $result['offices'];
+        $data = [];
         for($i=0;$i<=count($result);$i++) {
             if (isset($result[$i])) {
                 $streetName = (isset($result[$i]['address']['streetName']) ? ' - ' .$result[$i]['address']['streetName'] : '');
@@ -149,18 +157,18 @@ class SpeedyController
         return $sendRequest;
     }
 
-    public function createShipmentRequest($recipient, $order_id, $cashOnDelivery = null) {
+    public function createShipmentRequest($recipient, $order_id, $additionalServices = null) {
         //1
         $sender = self::serviceDetails();
         //3
         $serviceDetails = self::serviceDetails();
         //Cash on delivery
-        if($cashOnDelivery != null) {
-            $cashOnDelivery = [
+        if($additionalServices != null) {
+            /*$cashOnDelivery = [
                 'amount' => $cashOnDelivery['amount'],
                 'processingType' => 'CASH'
             ];
-            $additionalServices = ['cod'=>$cashOnDelivery];
+            $additionalServices = ['cod'=>$cashOnDelivery];*/
             $serviceDetails['additionalServices'] = $additionalServices;
         }
         //4
