@@ -160,6 +160,7 @@ class SpeedyController
     public function createShipmentRequest($recipient, $order_id, $additionalServices = null) {
         //1
         $sender = self::serviceDetails();
+        Log::info($sender);
         //3
         $serviceDetails = self::serviceDetails();
         //Cash on delivery
