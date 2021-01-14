@@ -1,11 +1,52 @@
 <?php
 
-
 namespace Digiageltd\Speedy;
-use Digiageltd\Speedy\Configs as configs;
 
-class Speedy extends Connect
+class SpeedyController
 {
+    public static $sender;
+    public static $apiUser;
+    public static $apiPass;
+    public static $apiBaseURL = 'https://api.speedy.bg/v1/';
+    public static $language = 'BG';
+
+    public static function writeCredentials($apiCredentials, $sender) {
+        self::$sender = $sender;
+        self::$apiUser = $apiCredentials['apiUser'];
+        self::$apiPass = $apiCredentials['apiPass'];
+    }
+
+    public static function apiCredentials() {
+        return ['apiUser'=>self::$apiUser, 'apiPass'=>self::$apiPass, 'apiBaseURL'=>self::$apiBaseURL, 'apiLang' => self::$language];
+    }
+
+    public function sendRequest($apiURL, $jsonInputData)
+    {
+        $jsonData = ['userName' => self::$apiUser, 'password' => self::$apiPass, 'language' => self::$language];
+        if ($jsonInputData != null) {
+            foreach ($jsonInputData as $key => $value) {
+                $jsonData[$key] = $value;
+            }
+        }
+        $curl = curl_init(self::$apiBaseURL . $apiURL);
+        $jsonDataEncoded = json_encode($jsonData);
+        #-> Set curl options
+        curl_setopt($curl, CURLOPT_POST, 1); // Tell cURL that we want to send a POST request.
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false); // Verify the peer's SSL certificate.
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true); // Stop showing results on the screen.
+        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 5); // The number of seconds to wait while trying to connect. Use 0 to wait indefinitely.
+        curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type: application/json')); // Set the content type to application/json
+        curl_setopt($curl, CURLOPT_POSTFIELDS, $jsonDataEncoded); // Attach our encoded JSON string to the POST fields.
+
+        #-> Get the response
+        $jsonResponse = curl_exec($curl);
+
+        if ($jsonResponse === FALSE) {
+            exit("cURL Error: " . curl_error($curl));
+        }
+        return ($jsonResponse);
+    }
+
     public function getCity($string, $criteria = null) {
         $jsonData['countryId'] = 100;
         switch ($criteria) {
@@ -29,7 +70,6 @@ class Speedy extends Connect
                 ];
             }
         }
-
         return json_encode($data);
     }
 
@@ -111,9 +151,9 @@ class Speedy extends Connect
 
     public function createShipmentRequest($recipient, $order_id, $cashOnDelivery = null) {
         //1
-        $sender = configs::serviceDetails();
+        $sender = self::serviceDetails();
         //3
-        $serviceDetails = configs::serviceDetails();
+        $serviceDetails = self::serviceDetails();
         //Cash on delivery
         if($cashOnDelivery != null) {
             $cashOnDelivery = [
@@ -162,6 +202,15 @@ class Speedy extends Connect
         ];
 
         return $this->sendRequest('print/', $jsonData);
+    }
+
+    public static function serviceDetails() {
+        return [
+            'pickupDate' => date('Y-m-d'),
+            'autoAdjustPickupDate' => true,
+            'serviceId' => 505,
+            'saturdayDelivery' => true
+        ];
     }
 
 }

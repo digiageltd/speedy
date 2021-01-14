@@ -10,6 +10,13 @@
         }
     ],
     "minimum-stability": "dev",
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Digiageltd\\Speedy\\SpeedyServiceProvider"
+            ]
+        }
+    },
     "autoload": {
         "psr-4": {
             "Digiageltd\\Speedy\\": "src/"
