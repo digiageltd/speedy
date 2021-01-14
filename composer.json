@@ -1,0 +1,19 @@
+{
+    "name": "digiageltd/speedy",
+    "description": "Speedy.bg Shipment Integration.",
+    "type": "project",
+    "license": "JRL",
+    "authors": [
+        {
+            "name": "digiageltd",
+            "email": "web@digiage.bg"
+        }
+    ],
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": {
+            "Digiageltd\\Speedy\\": "src/"
+        }
+    },
+    "require": {}
+}
